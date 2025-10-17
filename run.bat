@@ -1,0 +1,1 @@
+docker run --gpus all -v .\checkpoints:/workspace/checkpoints -p 8000:8000 ditto:latest

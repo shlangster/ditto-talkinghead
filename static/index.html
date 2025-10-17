@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ditto TalkingHead - File Upload</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .upload-form {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .file-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .file-group label {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .file-input-wrapper:hover {
+            background: #e9ecef;
+            border-color: #667eea;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-text {
+            color: #666;
+            font-size: 1em;
+        }
+
+        .file-selected {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .progress-container {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 10px;
+            color: #666;
+        }
+
+        .result-container {
+            display: none;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .result-video {
+            width: 100%;
+            max-width: 500px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+.download-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .download-btn:hover {
+            background: #218838;
+            transform: translateY(-1px);
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .supported-formats {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .supported-formats h4 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .supported-formats ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .supported-formats li {
+            background: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+        }
+
+        .files-section {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #e9ecef;
+        }
+
+        .files-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .files-header h3 {
+            color: #333;
+            margin: 0;
+        }
+
+        .refresh-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            background: #5a6268;
+        }
+
+        .files-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #f8f9fa;
+            transition: background-color 0.2s ease;
+        }
+
+        .file-item:last-child {
+            border-bottom: none;
+        }
+
+        .file-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .file-meta {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .download-link {
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            transition: all 0.3s ease;
+        }
+
+        .download-link:hover {
+            background: #218838;
+            color: white;
+        }
+
+        .no-files {
+            text-align: center;
+            color: #666;
+            padding: 40px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎭 Ditto TalkingHead</h1>
+            <p>Upload an image and audio to generate a talking head video</p>
+        </div>
+<form class="upload-form" id="uploadForm">
+            <div class="file-group">
+                <label for="sourceImage">Source Image</label>
+                <div class="file-input-wrapper" onclick="document.getElementById('sourceImage').click()">
+                    <input type="file" id="sourceImage" name="source_image" accept="image/*" required>
+                    <div class="file-input-text" id="imageText">Click to select an image</div>
+                </div>
+            </div>
+
+            <div class="file-group">
+                <label for="audioFile">Audio File</label>
+                <div class="file-input-wrapper" onclick="document.getElementById('audioFile').click()">
+                    <input type="file" id="audioFile" name="audio" accept="audio/*" required>
+                    <div class="file-input-text" id="audioText">Click to select an audio file</div>
+                </div>
+            </div>
+
+            <button type="button" class="submit-btn" id="submitBtn">
+                Generate Talking Head Video
+            </button>
+
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="progressText">Processing...</div>
+            </div>
+
+            <div class="result-container" id="resultContainer">
+                <h3>Your talking head video is ready!</h3>
+                <video class="result-video" id="resultVideo" controls></video>
+                <br>
+                <a href="#" class="download-btn" id="downloadBtn" download>Download Video</a>
+            </div>
+
+            <div class="error-message" id="errorMessage"></div>
+
+            <div class="supported-formats">
+                <h4>Supported Formats</h4>
+                <ul>
+                    <li>Images: PNG, JPG, JPEG, BMP, TIFF, WEBP</li>
+                    <li>Audio: WAV, MP3, M4A, FLAC, OGG</li>
+                </ul>
+            </div>
+        </form>
+
+        <div class="files-section">
+            <div class="files-header">
+                <h3>Generated Videos</h3>
+                <button class="refresh-btn" id="refreshBtn">Refresh</button>
+            </div>
+            <div class="files-list" id="filesList">
+                <div class="no-files">Loading files...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        const resultContainer = document.getElementById('resultContainer');
+        const resultVideo = document.getElementById('resultVideo');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        const imageText = document.getElementById('imageText');
+        const audioText = document.getElementById('audioText');
+        const filesList = document.getElementById('filesList');
+        const refreshBtn = document.getElementById('refreshBtn');
+
+        // File input handlers
+        document.getElementById('sourceImage').addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                imageText.textContent = `Selected: ${e.target.files[0].name}`;
+                imageText.className = 'file-selected';
+            }
+        });
+
+        document.getElementById('audioFile').addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                audioText.textContent = `Selected: ${e.target.files[0].name}`;
+                audioText.className = 'file-selected';
+            }
+        });
+// Form submission
+        async function handleFormSubmission() {
+            console.log('Form submission started');
+            
+            const formData = new FormData();
+            const sourceImage = document.getElementById('sourceImage').files[0];
+            const audioFile = document.getElementById('audioFile').files[0];
+
+            console.log('Source image:', sourceImage);
+            console.log('Audio file:', audioFile);
+
+            if (!sourceImage || !audioFile) {
+                showError('Please select both an image and audio file.');
+                return;
+            }
+
+            formData.append('source_image', sourceImage);
+            formData.append('audio', audioFile);
+            
+            console.log('FormData prepared, starting upload...');
+
+            // Show progress
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
+            progressContainer.style.display = 'block';
+            resultContainer.style.display = 'none';
+            errorMessage.style.display = 'none';
+
+            // Simulate progress (since we can't track actual progress easily)
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 10;
+                if (progress > 90) progress = 90;
+                progressFill.style.width = progress + '%';
+            }, 500);
+
+            try {
+                console.log('Sending request to /inference...');
+                const response = await fetch('/inference', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                console.log('Response received:', response.status, response.statusText);
+                clearInterval(progressInterval);
+                progressFill.style.width = '100%';
+
+                if (!response.ok) {
+                    console.error('Response not OK:', response.status, response.statusText);
+                    let errorMessage = 'Upload failed';
+                    try {
+                        const errorData = await response.json();
+                        errorMessage = errorData.detail || errorMessage;
+                    } catch (e) {
+                        console.error('Could not parse error response:', e);
+                        errorMessage = `Server error: ${response.status} ${response.statusText}`;
+                    }
+                    throw new Error(errorMessage);
+                }
+
+                // Get the video blob
+                const videoBlob = await response.blob();
+                const videoUrl = URL.createObjectURL(videoBlob);
+                
+                // Show result
+                resultVideo.src = videoUrl;
+                downloadBtn.href = videoUrl;
+                downloadBtn.download = `talking_head_${Date.now()}.mp4`;
+                
+                resultContainer.style.display = 'block';
+                progressText.textContent = 'Complete!';
+                
+                // Refresh the file list to show the new video
+                loadFiles();
+
+            } catch (error) {
+                console.error('Form submission error:', error);
+                clearInterval(progressInterval);
+                showError(error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Generate Talking Head Video';
+                progressContainer.style.display = 'none';
+            }
+        };
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+// Load and display files
+        async function loadFiles() {
+            try {
+                const response = await fetch('/files');
+                const data = await response.json();
+                
+                if (data.files.length === 0) {
+                    filesList.innerHTML = '<div class="no-files">No generated videos yet. Upload an image and audio to create your first talking head video!</div>';
+                    return;
+                }
+                
+                filesList.innerHTML = data.files.map(file => `
+                    <div class="file-item">
+                        <div class="file-info">
+                            <div class="file-name">${file.filename}</div>
+                            <div class="file-meta">
+                                ${formatFileSize(file.size)} • ${formatDate(file.created)}
+                            </div>
+                        </div>
+                        <div class="file-actions">
+                            <a href="${file.download_url}" class="download-link" download>Download</a>
+                        </div>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                filesList.innerHTML = '<div class="no-files">Error loading files. Please try refreshing.</div>';
+                console.error('Error loading files:', error);
+            }
+        }
+
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString();
+        }
+
+        // Refresh button handler
+        refreshBtn.addEventListener('click', loadFiles);
+
+        // Test submit button click
+        submitBtn.addEventListener('click', () => {
+            handleFormSubmission().catch(error => {
+                console.error('Error in form submission:', error);
+                showError('An unexpected error occurred. Please try again.');
+            });
+        });
+
+        // Debug form setup
+        console.log('Form element:', form);
+        console.log('Submit button:', submitBtn);
+        console.log('Source image input:', document.getElementById('sourceImage'));
+        console.log('Audio file input:', document.getElementById('audioFile'));
+
+        // Test server connectivity
+        async function testServerConnection() {
+            try {
+                const response = await fetch('/health');
+                if (response.ok) {
+                    console.log('Server is running and accessible');
+                } else {
+                    console.error('Server health check failed:', response.status);
+                }
+            } catch (error) {
+                console.error('Cannot connect to server:', error);
+            }
+        }
+
+        // Load files on page load
+        loadFiles();
+        
+        // Test server connection
+        testServerConnection();
+    </script>
+</body>
+</html>
